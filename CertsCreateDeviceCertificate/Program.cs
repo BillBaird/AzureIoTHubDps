@@ -15,6 +15,9 @@ namespace CertsCreateDeviceCertificate
     {
         static string directory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         static string pathToCerts = $"{directory}/../../../../Certs/";
+
+        static string CertPath(string fileName)
+            => Path.GetFullPath(Path.Combine(pathToCerts, fileName));
         static void Main(string[] args)
         {
             var serviceProvider = new ServiceCollection()
@@ -24,7 +27,10 @@ namespace CertsCreateDeviceCertificate
             var createClientServerAuthCerts = serviceProvider.GetService<CreateCertificatesClientServerAuth>();
             var iec = serviceProvider.GetService<ImportExportCertificate>();
 
-            var intermediate = new X509Certificate2($"{pathToCerts}dpsIntermediate1.pfx", "1234");
+            var fileName = CertPath("dpsIntermediate1.pfx");
+            Console.WriteLine($"Importing {fileName}");
+            var intermediate = new X509Certificate2(fileName, "1234");
+            Console.WriteLine($"Imported  {fileName}");
 
             var device = createClientServerAuthCerts.NewDeviceChainedCertificate(
                 new DistinguishedName { CommonName = "testdevice01" },
@@ -36,10 +42,14 @@ namespace CertsCreateDeviceCertificate
             var importExportCertificate = serviceProvider.GetService<ImportExportCertificate>();
 
             var deviceInPfxBytes = importExportCertificate.ExportChainedCertificatePfx(password, device, intermediate);
-            File.WriteAllBytes("testdevice01.pfx", deviceInPfxBytes);
+            fileName = CertPath("testdevice01.pfx");
+            File.WriteAllBytes(fileName, deviceInPfxBytes);
+            Console.WriteLine($"Exported {fileName}");
 
             var devicePEM = iec.PemExportPublicKeyCertificate(device);
-            File.WriteAllText("testdevice01.pem", devicePEM);
+            fileName = CertPath("testdevice01.pem");
+            File.WriteAllText(fileName, devicePEM);
+            Console.WriteLine($"Exported {fileName}");
 
    
 

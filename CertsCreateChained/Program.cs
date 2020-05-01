@@ -3,12 +3,18 @@ using CertificateManager.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
 namespace CertsCreateChained
 {
     class Program
     {
+        static string directory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        static string pathToCerts = $"{directory}/../../../../Certs/";
+
+        static string CertPath(string fileName)
+            => Path.GetFullPath(Path.Combine(pathToCerts, fileName));
         static void Main(string[] args)
         {
             var serviceProvider = new ServiceCollection()
@@ -39,27 +45,39 @@ namespace CertsCreateChained
 
             // EXPORTS PFX
 
-            var rootCertInPfxBtyes = iec.ExportRootPfx(password, dpsCa);
-            File.WriteAllBytes("dpsCa.pfx", rootCertInPfxBtyes);
+            var rootCertInPfxBytes = iec.ExportRootPfx(password, dpsCa);
+            var fileName = CertPath("dpsCa.pfx");
+            File.WriteAllBytes(fileName, rootCertInPfxBytes);
+            Console.WriteLine($"Exported {fileName}");
 
-            var dpsIntermediate1Btyes = iec.ExportChainedCertificatePfx(password, dpsIntermediate1, dpsCa);
-            File.WriteAllBytes("dpsIntermediate1.pfx", dpsIntermediate1Btyes);
+            var dpsIntermediate1Bytes = iec.ExportChainedCertificatePfx(password, dpsIntermediate1, dpsCa);
+            fileName = CertPath("dpsIntermediate1.pfx");
+            File.WriteAllBytes(fileName, dpsIntermediate1Bytes);
+            Console.WriteLine($"Exported {fileName}");
 
-            var dpsIntermediate2Btyes = iec.ExportChainedCertificatePfx(password, dpsIntermediate2, dpsCa);
-            File.WriteAllBytes("dpsIntermediate2.pfx", dpsIntermediate2Btyes);
+            var dpsIntermediate2Bytes = iec.ExportChainedCertificatePfx(password, dpsIntermediate2, dpsCa);
+            fileName = CertPath("dpsIntermediate2.pfx");
+            File.WriteAllBytes(fileName, dpsIntermediate2Bytes);
+            Console.WriteLine($"Exported {fileName}");
 
             Console.WriteLine("Certificates exported to pfx and cer files");
 
             // EXPORTS PEM
 
             var dpsCaPEM = iec.PemExportPublicKeyCertificate(dpsCa);
-            File.WriteAllText("dpsCa.pem", dpsCaPEM);
+            fileName = CertPath("dpsCa.pem");
+            File.WriteAllText(fileName, dpsCaPEM);
+            Console.WriteLine($"Exported {fileName}");
 
             var dpsIntermediate1PEM = iec.PemExportPublicKeyCertificate(dpsIntermediate1);
-            File.WriteAllText("dpsIntermediate1.pem", dpsIntermediate1PEM);
+            fileName = CertPath("dpsIntermediate1.pem");
+            File.WriteAllText(fileName, dpsIntermediate1PEM);
+            Console.WriteLine($"Exported {fileName}");
 
             var dpsIntermediate2PEM = iec.PemExportPublicKeyCertificate(dpsIntermediate2);
-            File.WriteAllText("dpsIntermediate2.pem", dpsIntermediate2PEM);
+            fileName = CertPath("dpsIntermediate2.pem");
+            File.WriteAllText(fileName, dpsIntermediate2PEM);
+            Console.WriteLine($"Exported {fileName}");
         }
     }
 }

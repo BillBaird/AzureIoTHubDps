@@ -22,4 +22,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SBCertUtils\SBCertUtils.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -30,7 +30,7 @@ namespace CertsCreateDeviceCertificate
                 new DistinguishedName { CommonName = "testdevice01" },
                 new ValidityPeriod { ValidFrom = DateTime.UtcNow, ValidTo = DateTime.UtcNow.AddYears(10) },
                 "testdevice01", intermediate);
-            device.FriendlyName = "IoT device testdevice01";
+            //device.FriendlyName = "IoT device testdevice01";
       
             string password = "1234";
             var importExportCertificate = serviceProvider.GetService<ImportExportCertificate>();

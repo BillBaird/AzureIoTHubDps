@@ -38,8 +38,10 @@ namespace CertsCreateDeviceCertificate
             Console.WriteLine($"Imported  {fileName}");
 
             Console.WriteLine($"Has Private Key = {intermediate.HasPrivateKey}");
+            Console.WriteLine($"PublicKey OID = {intermediate.PublicKey.Oid.Value}");
             switch (intermediate.PublicKey.Oid.Value) {
                 case RSA:
+            RSA_Label:
                     RSA rsa = intermediate.GetRSAPrivateKey(); // or cert.GetRSAPublicKey() when need public key
                     Console.WriteLine($"Got RSA PrivateKey = {rsa}, SignatureAlgorithm = {rsa.SignatureAlgorithm}, KeyExchangeAlgorithm = {rsa.KeyExchangeAlgorithm}, KeySize = {rsa.KeySize}");
                     // use the key
@@ -51,6 +53,11 @@ namespace CertsCreateDeviceCertificate
                     break;
                 case ECC:
                     ECDsa ecc = intermediate.GetECDsaPrivateKey(); // or cert.GetECDsaPublicKey() when need public key
+                    if (ecc == null)
+                    {
+                        Console.WriteLine("ecc was null, will do RSA");
+                        goto RSA_Label;
+                    }
                     Console.WriteLine($"Got ECC PrivateKey = {ecc}, SignatureAlgorithm = {ecc.SignatureAlgorithm}, KeyExchangeAlgorithm = {ecc.KeyExchangeAlgorithm}, KeySize = {ecc.KeySize}");
                     // use the key
                     break;

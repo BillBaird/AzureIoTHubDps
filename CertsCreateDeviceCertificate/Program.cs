@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace CertsCreateDeviceCertificate
@@ -18,6 +19,10 @@ namespace CertsCreateDeviceCertificate
 
         static string CertPath(string fileName)
             => Path.GetFullPath(Path.Combine(pathToCerts, fileName));
+        
+        const string RSA = "1.2.840.113549.1.1.1";
+        const string DSA = "1.2.840.10040.4.1";
+        const string ECC = "1.2.840.10045.2.1";
         static void Main(string[] args)
         {
             var serviceProvider = new ServiceCollection()
@@ -31,6 +36,25 @@ namespace CertsCreateDeviceCertificate
             Console.WriteLine($"Importing {fileName}");
             var intermediate = new X509Certificate2(fileName, "1234");
             Console.WriteLine($"Imported  {fileName}");
+
+            Console.WriteLine($"Has Private Key = {intermediate.HasPrivateKey}");
+            switch (intermediate.PublicKey.Oid.Value) {
+                case RSA:
+                    RSA rsa = intermediate.GetRSAPrivateKey(); // or cert.GetRSAPublicKey() when need public key
+                    Console.WriteLine($"Got RSA PrivateKey = {rsa}, SignatureAlgorithm = {rsa.SignatureAlgorithm}, KeyExchangeAlgorithm = {rsa.KeyExchangeAlgorithm}, KeySize = {rsa.KeySize}");
+                    // use the key
+                    break;
+                case DSA:
+                    DSA dsa = intermediate.GetDSAPrivateKey(); // or cert.GetDSAPublicKey() when need public key
+                    Console.WriteLine($"Got DSA PrivateKey = {dsa}, SignatureAlgorithm = {dsa.SignatureAlgorithm}, KeyExchangeAlgorithm = {dsa.KeyExchangeAlgorithm}, KeySize = {dsa.KeySize}");
+                    // use the key
+                    break;
+                case ECC:
+                    ECDsa ecc = intermediate.GetECDsaPrivateKey(); // or cert.GetECDsaPublicKey() when need public key
+                    Console.WriteLine($"Got ECC PrivateKey = {ecc}, SignatureAlgorithm = {ecc.SignatureAlgorithm}, KeyExchangeAlgorithm = {ecc.KeyExchangeAlgorithm}, KeySize = {ecc.KeySize}");
+                    // use the key
+                    break;
+            }
 
             var device = createClientServerAuthCerts.NewDeviceChainedCertificate(
                 new DistinguishedName { CommonName = "testdevice01" },
